@@ -5,14 +5,33 @@ package db
 import (
 	"database/sql"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type URL struct {
 	ID   string
 	Link string
+}
+
+// Setup sets up a database
+func Setup() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", "db/db.sqlite3")
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = os.Stat("./db/db.sqlite3"); os.IsNotExist(err) {
+		err = Init(db)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return db, nil
 }
 
 // Init initializes a database

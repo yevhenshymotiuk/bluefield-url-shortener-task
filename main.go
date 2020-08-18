@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/yevhenshymotiuk/bluefield-url-shortener-task/db"
 )
 
 func main() {
@@ -14,7 +16,13 @@ func main() {
 }
 
 func run() error {
-	srv, err := newServer()
+	database, err := db.Setup()
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	srv, err := newServer(database)
 	if err != nil {
 		return err
 	}

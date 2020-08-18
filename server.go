@@ -5,10 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/julienschmidt/httprouter"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/yevhenshymotiuk/bluefield-url-shortener-task/db"
 )
 
@@ -17,22 +15,10 @@ type server struct {
 	router *httprouter.Router
 }
 
-func newServer() (*server, error) {
-	database, err := sql.Open("sqlite3", "db/db.sqlite3")
-	if err != nil {
-		return nil, err
-	}
-
-	if _, err = os.Stat("./db/db.sqlite3"); os.IsNotExist(err) {
-		err = db.Init(database)
-		if err != nil {
-			return nil, err
-		}
-	}
-
+func newServer(db *sql.DB) (*server, error) {
 	router := httprouter.New()
 
-	s := &server{db: database, router: router}
+	s := &server{db: db, router: router}
 	s.routes()
 
 	return s, nil
