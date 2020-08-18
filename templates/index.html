@@ -24,6 +24,7 @@
                             id="url"
                             name="url"
                             placeholder="https://example.com"
+                            required
                         />
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-success">
@@ -35,7 +36,10 @@
             </form>
             {{ if .ID }}
             <hr />
-            <span>Shortened URL: <a href="/{{ .ID }}">{{ .Host }}/{{ .ID }}</a></span>
+            <span>
+                Shortened URL:
+                <a href="/{{ .ID }}">{{ .Host }}/{{ .ID }}</a>
+            </span>
             {{ end }}
         </div>
 
