@@ -18,6 +18,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	defer srv.db.Close()
 
 	port := 8080
 	log.Println(fmt.Sprintf("Listening on %d", port))

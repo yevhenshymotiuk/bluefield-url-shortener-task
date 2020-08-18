@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +22,6 @@ func newServer() (*server, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer database.Close()
 
 	if _, err = os.Stat("./db/db.sqlite3"); os.IsNotExist(err) {
 		err = db.Init(database)
@@ -41,23 +40,46 @@ func newServer() (*server, error) {
 
 func (s *server) handleIndex() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		fmt.Fprintln(w, "Hello, World!")
+		err := r.ParseForm()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		longURL := r.Form.Get("url")
+
+		var shortenedURL db.URL
+
+		if longURL != "" {
+			shortenedURL, err = db.AddURL(s.db, db.URL{Link: longURL})
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+
+		t, err := template.ParseFiles("./templates/index.html")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Println(r.URL.Host)
+
+		t.Execute(w, shortenedURL.ID)
 	}
 }
 
 func (s *server) handleShortenedURL() httprouter.Handle {
-	urls, err := db.GetURLs(s.db)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	urlsMap := make(map[string]string)
-
-	for _, url := range urls {
-		urlsMap[url.ID] = url.Link
-	}
-
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		urls, err := db.GetURLs(s.db)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		urlsMap := make(map[string]string)
+
+		for _, url := range urls {
+			urlsMap[url.ID] = url.Link
+		}
+
 		id := p.ByName("id")
 		if err != nil {
 			log.Fatalln(err)

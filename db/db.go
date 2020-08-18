@@ -23,8 +23,7 @@ func Init(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-
-	err = AddURL(db, URL{Link: "https://pkg.go.dev/"})
+	_, err = AddURL(db, URL{Link: "https://pkg.go.dev/"})
 
 	return err
 }
@@ -68,18 +67,47 @@ func GetURLs(db *sql.DB) ([]URL, error) {
 	return URLs, nil
 }
 
+// GetURL queries URL by ID
+func GetURL(db *sql.DB, uuid string) (URL, error) {
+	row, err := db.Query("SELECT * FROM URL WHERE ID=?", uuid)
+	if err != nil {
+		return URL{}, err
+	}
+	defer row.Close()
+
+	var (
+		ID string
+		link string
+	)
+
+	for row.Next() {
+		row.Scan(&ID, &link)
+	}
+
+	return URL{ID: ID, Link: link}, nil
+}
+
 // AddURL adds new URL
-func AddURL(db *sql.DB, url URL) error {
+func AddURL(db *sql.DB, url URL) (URL, error) {
 	insertURLSQL := `INSERT INTO URL(ID, link) values (?, ?)`
 
 	statement, err := db.Prepare(insertURLSQL)
 	if err != nil {
-		return err
+		return URL{}, err
 	}
 
 	id := strings.Replace(uuid.New().String(), "-", "", -1)[:4]
 
 	_, err = statement.Exec(id, url.Link)
+	if err != nil {
+		return URL{}, err
+	}
 
-	return err
+	insertedURL, err := GetURL(db, id)
+	if err != nil {
+		return URL{}, err
+	}
+
+
+	return insertedURL, nil
 }
