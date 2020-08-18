@@ -13,7 +13,7 @@ import (
 )
 
 type server struct {
-	db *sql.DB
+	db     *sql.DB
 	router *httprouter.Router
 }
 
@@ -39,6 +39,11 @@ func newServer() (*server, error) {
 }
 
 func (s *server) handleIndex() httprouter.Handle {
+	type data struct {
+		Host string
+		ID   string
+	}
+
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		err := r.ParseForm()
 		if err != nil {
@@ -61,9 +66,7 @@ func (s *server) handleIndex() httprouter.Handle {
 			log.Fatalln(err)
 		}
 
-		log.Println(r.URL.Host)
-
-		t.Execute(w, shortenedURL.ID)
+		t.Execute(w, data{Host: r.Host, ID: shortenedURL.ID})
 	}
 }
 

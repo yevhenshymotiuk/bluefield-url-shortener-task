@@ -33,9 +33,9 @@
                     </div>
                 </div>
             </form>
-            {{ if . }}
+            {{ if .ID }}
             <hr />
-            <span>Shortened URL: <a href="/{{ . }}">{{ . }}</a></span>
+            <span>Shortened URL: <a href="/{{ .ID }}">{{ .Host }}/{{ .ID }}</a></span>
             {{ end }}
         </div>
 
