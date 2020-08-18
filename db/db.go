@@ -77,7 +77,7 @@ func AddURL(db *sql.DB, url URL) error {
 		return err
 	}
 
-	id := strings.Replace(uuid.New().String()[:4], "-", "", -1)
+	id := strings.Replace(uuid.New().String(), "-", "", -1)[:4]
 
 	_, err = statement.Exec(id, url.Link)
 
