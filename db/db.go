@@ -5,10 +5,13 @@ package db
 import (
 	"database/sql"
 	"log"
+	"strings"
+
+	"github.com/google/uuid"
 )
 
 type URL struct {
-	ID   int
+	ID   string
 	Link string
 }
 
@@ -27,8 +30,8 @@ func Init(db *sql.DB) error {
 }
 
 func createURLTable(db *sql.DB) error {
-	createURLTableSQL := `CREATE TABLE IF NOT EXISTS URL (
-    "ID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	createURLTableSQL := `CREATE TABLE URL (
+    "ID" UUID NOT NULL PRIMARY KEY,
     "link" TEXT
 );`
 
@@ -53,7 +56,7 @@ func GetURLs(db *sql.DB) ([]URL, error) {
 
 	for row.Next() {
 		var (
-			ID   int
+			ID   string
 			link string
 		)
 
@@ -67,13 +70,16 @@ func GetURLs(db *sql.DB) ([]URL, error) {
 
 // AddURL adds new URL
 func AddURL(db *sql.DB, url URL) error {
-	insertURLSQL := `INSERT INTO URL(link) values (?)`
+	insertURLSQL := `INSERT INTO URL(ID, link) values (?, ?)`
 
 	statement, err := db.Prepare(insertURLSQL)
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(url.Link)
+
+	id := strings.Replace(uuid.New().String()[:4], "-", "", -1)
+
+	_, err = statement.Exec(id, url.Link)
 
 	return err
 }
