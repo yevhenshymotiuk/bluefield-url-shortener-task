@@ -8,7 +8,7 @@
 - [ ] All of the implemented HTTP handlers should have unit tests.
 
 ## Optional
-- [ ] All shortened URLs should be persisted locally to a file using
+- [X] All shortened URLs should be persisted locally to a file using
   simple storage methods (SQLite, BoltDB, CSV..).
 - [ ] The redirect requests should be cached in memory for certain
   amount of time.
