@@ -57,28 +57,20 @@ func (s *server) handleIndex() httprouter.Handle {
 }
 
 func (s *server) handleShortenedURL() httprouter.Handle {
+	var emptyURL db.URL
+
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		urls, err := db.GetURLs(s.db)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		urlsMap := make(map[string]string)
-
-		for _, url := range urls {
-			urlsMap[url.ID] = url.Link
-		}
-
 		id := p.ByName("id")
+
+		url, err := db.GetURL(s.db, id)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
-		url, prs := urlsMap[id]
-		if prs {
-			http.Redirect(w, r, url, http.StatusFound)
-		} else {
+		if url == emptyURL {
 			http.NotFound(w, r)
+		} else {
+			http.Redirect(w, r, url.Link, http.StatusFound)
 		}
 	}
 }
