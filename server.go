@@ -37,9 +37,11 @@ func (s *server) handleIndex() httprouter.Handle {
 		}
 
 		longURL := r.Form.Get("url")
-		url := db.URL{ID: db.NewURLID(), Link: longURL}
+		var url db.URL
 
 		if longURL != "" {
+			url = db.URL{ID: db.NewURLID(), Link: longURL}
+
 			err = db.AddURL(s.db, url)
 			if err != nil {
 				log.Fatalln(err)
