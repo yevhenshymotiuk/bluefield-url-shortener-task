@@ -1,4 +1,4 @@
 .PHONY: run
 
 run:
-	go run *.go
+	go run main.go server.go routes.go
