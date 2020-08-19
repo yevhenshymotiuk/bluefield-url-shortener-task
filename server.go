@@ -37,11 +37,10 @@ func (s *server) handleIndex() httprouter.Handle {
 		}
 
 		longURL := r.Form.Get("url")
-
-		var shortenedURL db.URL
+		url := db.URL{ID: db.NewURLID(), Link: longURL}
 
 		if longURL != "" {
-			shortenedURL, err = db.AddURL(s.db, db.URL{Link: longURL})
+			err = db.AddURL(s.db, url)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -52,7 +51,7 @@ func (s *server) handleIndex() httprouter.Handle {
 			log.Fatalln(err)
 		}
 
-		t.Execute(w, data{Host: r.Host, ID: shortenedURL.ID})
+		t.Execute(w, data{Host: r.Host, ID: url.ID})
 	}
 }
 
@@ -72,5 +71,12 @@ func (s *server) handleShortenedURL() httprouter.Handle {
 		} else {
 			http.Redirect(w, r, url.Link, http.StatusFound)
 		}
+	}
+}
+
+func (s *server) cache(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Cache-Control", "max-age=300")
+		h(w, r, p)
 	}
 }

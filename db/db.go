@@ -12,6 +12,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// URL describes URL DB table row
 type URL struct {
 	ID   string
 	Link string
@@ -42,7 +43,7 @@ func Init(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	_, err = AddURL(db, URL{Link: "https://pkg.go.dev/"})
+	err = AddURL(db, URL{Link: "https://pkg.go.dev/"})
 
 	return err
 }
@@ -95,7 +96,7 @@ func GetURL(db *sql.DB, uuid string) (URL, error) {
 	defer row.Close()
 
 	var (
-		ID string
+		ID   string
 		link string
 	)
 
@@ -106,27 +107,30 @@ func GetURL(db *sql.DB, uuid string) (URL, error) {
 	return URL{ID: ID, Link: link}, nil
 }
 
+// NewURLID returns new unique URL identifier
+func NewURLID() string {
+	return strings.Replace(uuid.New().String(), "-", "", -1)[:4]
+}
+
 // AddURL adds new URL
-func AddURL(db *sql.DB, url URL) (URL, error) {
+func AddURL(db *sql.DB, url URL) error {
 	insertURLSQL := `INSERT INTO URL(ID, link) values (?, ?)`
 
 	statement, err := db.Prepare(insertURLSQL)
 	if err != nil {
-		return URL{}, err
+		return err
 	}
 
-	id := strings.Replace(uuid.New().String(), "-", "", -1)[:4]
+	id := url.ID
+
+	if id == "" {
+		id = NewURLID()
+	}
 
 	_, err = statement.Exec(id, url.Link)
 	if err != nil {
-		return URL{}, err
+		return err
 	}
 
-	insertedURL, err := GetURL(db, id)
-	if err != nil {
-		return URL{}, err
-	}
-
-
-	return insertedURL, nil
+	return nil
 }
