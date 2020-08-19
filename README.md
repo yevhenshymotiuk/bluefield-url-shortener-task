@@ -13,5 +13,5 @@ Run the server using Makefile `make run`
 ### Optional
 - [X] All shortened URLs should be persisted locally to a file using
   simple storage methods (SQLite, BoltDB, CSV..).
-- [ ] The redirect requests should be cached in memory for certain
+- [X] The redirect requests should be cached in memory for certain
   amount of time.
